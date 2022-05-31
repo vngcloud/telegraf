@@ -18,6 +18,7 @@ import (
 	"github.com/influxdata/telegraf/plugins/parsers/prometheus"
 	"github.com/influxdata/telegraf/plugins/parsers/prometheusremotewrite"
 	"github.com/influxdata/telegraf/plugins/parsers/value"
+	"github.com/influxdata/telegraf/plugins/parsers/vngcloud_vmonitor"
 	"github.com/influxdata/telegraf/plugins/parsers/wavefront"
 	"github.com/influxdata/telegraf/plugins/parsers/xpath"
 )
@@ -293,6 +294,8 @@ func NewParser(config *Config) (Parser, error) {
 		}
 	case "json_v2":
 		parser, err = NewJSONPathParser(config.JSONV2Config)
+	case "vcmcinput":
+		parser, err = NewVNGCloudvMonitorParser()
 	default:
 		creator, found := Parsers[config.DataFormat]
 		if !found {
@@ -458,4 +461,7 @@ func NewJSONPathParser(jsonv2config []JSONV2Config) (Parser, error) {
 	return &json_v2.Parser{
 		Configs: configs,
 	}, nil
+}
+func NewVNGCloudvMonitorParser() (Parser, error) {
+	return &vngcloud_vmonitor.ValueParser{}, nil
 }

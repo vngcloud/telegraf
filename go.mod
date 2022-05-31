@@ -167,6 +167,12 @@ require (
 )
 
 require (
+	github.com/denisbrodbeck/machineid v1.0.1 // indirect
+	github.com/matishsiao/goInfo v0.0.0-20210923090445-da2e3fa8d45f // indirect
+	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
+)
+
+require (
 	cloud.google.com/go v0.100.2 // indirect
 	cloud.google.com/go/compute v0.1.0 // indirect
 	cloud.google.com/go/iam v0.1.1 // indirect
