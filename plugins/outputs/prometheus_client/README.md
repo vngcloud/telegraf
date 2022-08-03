@@ -56,3 +56,7 @@ Prometheus metrics are produced in the same manner as the [prometheus
 serializer][].
 
 [prometheus serializer]: /plugins/serializers/prometheus/README.md#Metrics
+manner as the [prometheus
+serializer][].
+
+[prometheus serializer]: /plugins/serializers/prometheus/README.md#Metrics

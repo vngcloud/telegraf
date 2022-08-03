@@ -57,7 +57,7 @@ const (
 	defaultMethod        = http.MethodPost
 	apiKey               = "X-API-Key"
 	InsecureSkipVerify   = false
-	AgentVersion         = "1.18.0-1.0.1"
+	AgentVersion         = "1.23.0-1.1.0"
 )
 
 type Oauth2Access struct {

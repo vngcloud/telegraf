@@ -1,8 +1,9 @@
 package syslog
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFraming(t *testing.T) {
