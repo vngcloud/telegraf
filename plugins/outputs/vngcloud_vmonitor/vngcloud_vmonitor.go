@@ -576,7 +576,7 @@ func (h *VNGCloudvMonitor) write(reqBody []byte) error {
 		return err
 	}
 
-	log.Printf("[vMonitor] Request-ID: %s - %s", resp.Header.Get("Api-Request-ID"), dataRsp)
+	log.Printf("[vMonitor] Request-ID: %s with body length %d byte and response body %s", resp.Header.Get("Api-Request-ID"), len(reqBody), dataRsp)
 
 	if resp.StatusCode == 401 {
 		err = h.getAccessTokenFromRefreshToken()
