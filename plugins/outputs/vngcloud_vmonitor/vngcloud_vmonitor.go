@@ -151,7 +151,7 @@ func (h *VNGCloudvMonitor) makeRequest() ([]byte, error) {
 		return nil, err
 	}
 
-	log.Printf("[vMonitor] Request-ID: %s", res.Header.Get("Api-Request-ID"))
+	log.Printf("[vMonitor] Request-ID: %s with body length %d byte", res.Header.Get("Api-Request-ID"), len(h.Requests.Body))
 
 	if res.StatusCode < 200 || res.StatusCode > 209 {
 		data, _ := ioutil.ReadAll(res.Body)
