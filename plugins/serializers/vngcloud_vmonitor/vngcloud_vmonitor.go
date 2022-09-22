@@ -23,8 +23,10 @@ type Table struct {
 }
 
 const (
-	MaxCharDmsValue = 255
-	MinCharDmsValue = 1
+	MaxCharDmsValue   = 255
+	MinCharDmsValue   = 1
+	MaxCharMetricName = 255
+	MinCharMetricName = 1
 )
 
 var LabelNameTable = Table{
@@ -38,7 +40,7 @@ var LabelNameTable = Table{
 	},
 	Rest: &unicode.RangeTable{
 		R16: []unicode.Range16{
-			{0x0030, 0x0039, 1}, // 0-9
+			{0x002D, 0x0039, 1}, // - . / and 0-9
 			{0x0041, 0x005A, 1}, // A-Z
 			{0x005F, 0x005F, 1}, // _
 			{0x0061, 0x007A, 1}, // a-z
@@ -78,16 +80,16 @@ var LabelValueWhitelistTable = Table{
 var MetricNameTable = Table{
 	First: &unicode.RangeTable{
 		R16: []unicode.Range16{
-			{0x003A, 0x003A, 1}, // :
+			// {0x003A, 0x003A, 1}, // :
 			{0x0041, 0x005A, 1}, // A-Z
 			{0x005F, 0x005F, 1}, // _
 			{0x0061, 0x007A, 1}, // a-z
 		},
-		LatinOffset: 4,
+		LatinOffset: 3,
 	},
 	Rest: &unicode.RangeTable{
 		R16: []unicode.Range16{
-			{0x0030, 0x003A, 1}, // 0-:
+			{0x002D, 0x0039, 1}, // - . / and 0-9
 			{0x0041, 0x005A, 1}, // A-Z
 			{0x005F, 0x005F, 1}, // _
 			{0x0061, 0x007A, 1}, // a-z
@@ -122,9 +124,7 @@ func isWhitelistDimensionsValue(name string, table Table) bool {
 		return false
 	}
 	for _, r := range name {
-		// log.Printf("[vMonitor] Compare with white list character: %s", string(r))
 		if !unicode.In(r, table.DimensionValues) {
-			log.Printf("[vMonitor] Dimension Value: %s has invalid character: %s", name, string(r))
 			return false
 		}
 	}
@@ -147,6 +147,11 @@ func isValidDimensionsValue(name string, table Table) bool {
 }
 
 func sanitize(name string, table Table) (string, bool) {
+	if len(name) > MaxCharMetricName || len(name) < MinCharMetricName {
+		log.Printf("[vMonitor] Metric or Dimension name higher than max character length (%d): %s", len(name), name)
+		return name, false
+	}
+
 	if isValid(name, table) {
 		return name, true
 	}
@@ -179,7 +184,7 @@ func sanitize(name string, table Table) (string, bool) {
 func sanitizeWhitelistString(name string, table Table) (string, bool) {
 
 	if len(name) > MaxCharDmsValue || len(name) < MinCharDmsValue {
-		log.Printf("[vMonitor] Valid max(%d): %s", len(name), name)
+		log.Printf("[vMonitor] Dimension value higher than max character length (%d): %s", len(name), name)
 		return name, false
 	}
 
