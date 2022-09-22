@@ -62,6 +62,19 @@ var LabelValueTable = Table{
 	},
 }
 
+var LabelValueWhitelistTable = Table{
+	// white list char
+	DimensionValues: &unicode.RangeTable{
+		R16: []unicode.Range16{
+			{0x002D, 0x0039, 1}, // - . / and 0-9
+			{0x0041, 0x005A, 1}, // A-Z
+			{0x005F, 0x005F, 1}, // _
+			{0x0061, 0x007A, 1}, // a-z
+		},
+		LatinOffset: 4,
+	},
+}
+
 var MetricNameTable = Table{
 	First: &unicode.RangeTable{
 		R16: []unicode.Range16{
@@ -104,6 +117,20 @@ func isValid(name string, table Table) bool {
 	return true
 }
 
+func isWhitelistDimensionsValue(name string, table Table) bool {
+	if name == "" {
+		return false
+	}
+	for _, r := range name {
+		// log.Printf("[vMonitor] Compare with white list character: %s", string(r))
+		if !unicode.In(r, table.DimensionValues) {
+			log.Printf("[vMonitor] Dimension Value: %s has invalid character: %s", name, string(r))
+			return false
+		}
+	}
+	return true
+}
+
 func isValidDimensionsValue(name string, table Table) bool {
 	if name == "" {
 		return false
@@ -141,6 +168,35 @@ func sanitize(name string, table Table) (string, bool) {
 		}
 	}
 
+	name = strings.Trim(b.String(), "_")
+	if name == "" {
+		return "", false
+	}
+
+	return name, true
+}
+
+func sanitizeWhitelistString(name string, table Table) (string, bool) {
+
+	if len(name) > MaxCharDmsValue || len(name) < MinCharDmsValue {
+		log.Printf("[vMonitor] Valid max(%d): %s", len(name), name)
+		return name, false
+	}
+
+	if isWhitelistDimensionsValue(name, table) {
+		return name, true
+	}
+
+	// sanitize name
+	var b strings.Builder
+
+	for _, r := range name {
+		if unicode.In(r, table.DimensionValues) {
+			b.WriteRune(r)
+		} else {
+			b.WriteString("_")
+		}
+	}
 	name = strings.Trim(b.String(), "_")
 	if name == "" {
 		return "", false
@@ -196,6 +252,10 @@ func SanitizeLabelValue(name string) (string, bool) {
 	return sanitizeString(name, LabelValueTable)
 }
 
+func SanitizeWhitelistLabelValue(name string) (string, bool) {
+	return sanitizeWhitelistString(name, LabelValueWhitelistTable)
+}
+
 func NewSerializer(timestampUnits time.Duration) (*serializer, error) {
 	s := &serializer{
 		TimestampUnits: truncateDuration(timestampUnits),
@@ -219,6 +279,7 @@ func (s *serializer) Serialize(metric telegraf.Metric) ([]byte, error) {
 
 func (s *serializer) SerializeBatch(metrics []telegraf.Metric) ([]byte, error) {
 	var objects []interface{}
+
 	for _, metric := range metrics {
 		m, err := s.createObject(metric)
 		if err != nil {
@@ -239,6 +300,7 @@ func (s *serializer) SerializeBatch(metrics []telegraf.Metric) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+	log.Printf("[vMonitor] Serialized batch %d metrics", len(metrics))
 	return serialized, nil
 }
 
@@ -292,7 +354,8 @@ func (s *serializer) createObject(metric telegraf.Metric) ([]map[string]interfac
 		if !ok || tag.Value == "" {
 			continue
 		}
-		valueTag, ok := SanitizeLabelValue(tag.Value)
+		// valueTag, ok := SanitizeLabelValue(tag.Value)
+		valueTag, ok := SanitizeWhitelistLabelValue(tag.Value)
 		if !ok {
 			continue
 		}

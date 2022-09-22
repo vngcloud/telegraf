@@ -508,7 +508,6 @@ func (h *VNGCloudvMonitor) Write(metrics []telegraf.Metric) error {
 			return err
 		}
 	}
-
 	reqBody, err := h.serializer.SerializeBatch(metrics)
 	if err != nil {
 		return err
