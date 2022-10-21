@@ -52,7 +52,7 @@ var sampleConfig = `
 `
 
 const (
-	defaultClientTimeout = 5 * time.Second
+	defaultClientTimeout = 10 * time.Second
 	defaultContentType   = "application/json"
 	defaultMethod        = http.MethodPost
 	apiKey               = "X-API-Key"

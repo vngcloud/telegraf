@@ -89,7 +89,7 @@
   ## The logfile will be rotated after the time interval specified.  When set
   ## to 0 no time based rotation is performed.  Logs are rotated only when
   ## written to, if there is no log activity rotation may be delayed.
-  # logfile_rotation_interval = "0d"
+  # logfile_rotation_interval = "0h"
 
   ## The logfile will be rotated when it becomes larger than the specified
   ## size.  When set to 0 no size based rotation is performed.
@@ -117,15 +117,16 @@
 #                            OUTPUT PLUGINS                                   #
 ###############################################################################
 
-# Configuration for sending metrics to VNG Cloud vMonitor
+# Configuration for sending metrics to vMonitor
 [[outputs.vngcloud_vmonitor]]
   url = "https://${VMONITOR_SITE}:443"
   insecure_skip_verify = false
   data_format = "vngcloud_vmonitor"
   api_key = "${API_KEY}"
   timeout = "30s"
+
 # Configuration for sending metrics to InfluxDB
-#[[outputs.influxdb]]
+# [[outputs.influxdb]]
   ## The full HTTP or UDP URL for your InfluxDB instance.
   ##
   ## Multiple URLs can be specified for a single cluster, only ONE of the
@@ -2962,9 +2963,9 @@
 
 
 # # Calculates a derivative for every field.
-# [[aggregators.derivative]]
+[[aggregators.derivative]]
 # 	## The period in which to flush the aggregator.
-# 	period = "30s"
+   	period = "60s"
 # 	##
 # 	## If true, the original metric will be dropped by the
 # 	## aggregator and will not get sent to the output plugins.
@@ -3151,79 +3152,79 @@
 ###############################################################################
 
 
-# # Read metrics about cpu usage
-# [[inputs.cpu]]
-#   ## Whether to report per-cpu stats or not
-#   percpu = true
-#   ## Whether to report total system cpu stats or not
-#   totalcpu = true
-#   ## If true, collect raw CPU time metrics
-#   collect_cpu_time = false
-#   ## If true, compute and report the sum of all non-idle CPU states
-#   report_active = false
+# Read metrics about cpu usage
+[[inputs.cpu]]
+  ## Whether to report per-cpu stats or not
+  percpu = true
+  ## Whether to report total system cpu stats or not
+  totalcpu = true
+  ## If true, collect raw CPU time metrics
+  collect_cpu_time = false
+  ## If true, compute and report the sum of all non-idle CPU states
+  report_active = false
 
 
-# # Read metrics about disk usage by mount point
-# [[inputs.disk]]
-#   ## By default stats will be gathered for all mount points.
-#   ## Set mount_points will restrict the stats to only the specified mount points.
-#   # mount_points = ["/"]
+# Read metrics about disk usage by mount point
+[[inputs.disk]]
+  ## By default stats will be gathered for all mount points.
+  ## Set mount_points will restrict the stats to only the specified mount points.
+  # mount_points = ["/"]
 
-#   ## Ignore mount points by filesystem type.
-#   ignore_fs = ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
-
-
-# # Read metrics about disk IO by device
-# [[inputs.diskio]]
-#   ## By default, telegraf will gather stats for all devices including
-#   ## disk partitions.
-#   ## Setting devices will restrict the stats to the specified devices.
-#   # devices = ["sda", "sdb", "vd*"]
-#   ## Uncomment the following line if you need disk serial numbers.
-#   # skip_serial_number = false
-#   #
-#   ## On systems which support it, device metadata can be added in the form of
-#   ## tags.
-#   ## Currently only Linux is supported via udev properties. You can view
-#   ## available properties for a device by running:
-#   ## 'udevadm info -q property -n /dev/sda'
-#   ## Note: Most, but not all, udev properties can be accessed this way. Properties
-#   ## that are currently inaccessible include DEVTYPE, DEVNAME, and DEVPATH.
-#   # device_tags = ["ID_FS_TYPE", "ID_FS_USAGE"]
-#   #
-#   ## Using the same metadata source as device_tags, you can also customize the
-#   ## name of the device via templates.
-#   ## The 'name_templates' parameter is a list of templates to try and apply to
-#   ## the device. The template may contain variables in the form of '$PROPERTY' or
-#   ## '${PROPERTY}'. The first template which does not contain any variables not
-#   ## present for the device is used as the device name tag.
-#   ## The typical use case is for LVM volumes, to get the VG/LV name instead of
-#   ## the near-meaningless DM-0 name.
-#   # name_templates = ["$ID_FS_LABEL","$DM_VG_NAME/$DM_LV_NAME"]
+  ## Ignore mount points by filesystem type.
+  ignore_fs = ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
 
 
-# # Get kernel statistics from /proc/stat
-# [[inputs.kernel]]
-#   # no configuration
+# Read metrics about disk IO by device
+[[inputs.diskio]]
+  ## By default, telegraf will gather stats for all devices including
+  ## disk partitions.
+  ## Setting devices will restrict the stats to the specified devices.
+  # devices = ["sda", "sdb", "vd*"]
+  ## Uncomment the following line if you need disk serial numbers.
+  # skip_serial_number = false
+  #
+  ## On systems which support it, device metadata can be added in the form of
+  ## tags.
+  ## Currently only Linux is supported via udev properties. You can view
+  ## available properties for a device by running:
+  ## 'udevadm info -q property -n /dev/sda'
+  ## Note: Most, but not all, udev properties can be accessed this way. Properties
+  ## that are currently inaccessible include DEVTYPE, DEVNAME, and DEVPATH.
+  # device_tags = ["ID_FS_TYPE", "ID_FS_USAGE"]
+  #
+  ## Using the same metadata source as device_tags, you can also customize the
+  ## name of the device via templates.
+  ## The 'name_templates' parameter is a list of templates to try and apply to
+  ## the device. The template may contain variables in the form of '$PROPERTY' or
+  ## '${PROPERTY}'. The first template which does not contain any variables not
+  ## present for the device is used as the device name tag.
+  ## The typical use case is for LVM volumes, to get the VG/LV name instead of
+  ## the near-meaningless DM-0 name.
+  # name_templates = ["$ID_FS_LABEL","$DM_VG_NAME/$DM_LV_NAME"]
 
 
-# # Read metrics about memory usage
-# [[inputs.mem]]
-#   # no configuration
+# Get kernel statistics from /proc/stat
+[[inputs.kernel]]
+  # no configuration
 
 
-# # Get the number of processes and group them by status
-# [[inputs.processes]]
-#   # no configuration
+# Read metrics about memory usage
+[[inputs.mem]]
+  # no configuration
 
 
-# # Read metrics about swap memory usage
-# [[inputs.swap]]
-#   # no configuration
+# Get the number of processes and group them by status
+[[inputs.processes]]
+  # no configuration
 
 
-# # Read metrics about system load & uptime
-# [[inputs.system]]
+# Read metrics about swap memory usage
+[[inputs.swap]]
+  # no configuration
+
+
+# Read metrics about system load & uptime
+[[inputs.system]]
   ## Uncomment to remove deprecated metrics.
   # fielddrop = ["uptime_format"]
 
@@ -3371,6 +3372,18 @@
 #
 #   ## Set to false to disable peeking age of oldest message (executes faster)
 #   # peek_oldest_message_age = true
+
+
+# # Read metrics of bcache from stats_total and dirty_data
+# [[inputs.bcache]]
+#   ## Bcache sets path
+#   ## If not specified, then default is:
+#   bcachePath = "/sys/fs/bcache"
+#
+#   ## By default, Telegraf gather stats for all bcache devices
+#   ## Setting devices will restrict the stats to the specified
+#   ## bcache devices.
+#   bcacheDevs = ["bcache0"]
 
 
 # # Collects Beanstalkd server and tubes stats
@@ -3657,6 +3670,22 @@
 #   #    value = "p-example"
 
 
+# # Collects conntrack stats from the configured directories and files.
+# [[inputs.conntrack]]
+#    ## The following defaults would work with multiple versions of conntrack.
+#    ## Note the nf_ and ip_ filename prefixes are mutually exclusive across
+#    ## kernel versions, as are the directory locations.
+#
+#    ## Superset of filenames to look for within the conntrack dirs.
+#    ## Missing files will be ignored.
+#    files = ["ip_conntrack_count","ip_conntrack_max",
+#             "nf_conntrack_count","nf_conntrack_max"]
+#
+#    ## Directories to search within for the conntrack files above.
+#    ## Missing directories will be ignored.
+#    dirs = ["/proc/sys/net/ipv4/netfilter","/proc/sys/net/netfilter"]
+
+
 # # Gather health check statuses from services registered in Consul
 # [[inputs.consul]]
 #   ## Consul server address
@@ -3914,6 +3943,40 @@
 #   ## Wildcard matches like "*.com". An empty string "" is same as "*"
 #   ## If type = "ip" filters should be <IP/network>
 #   filters = [""]
+
+
+# # Reads metrics from DPDK applications using v2 telemetry interface.
+# [[inputs.dpdk]]
+#   ## Path to DPDK telemetry socket. This shall point to v2 version of DPDK telemetry interface.
+#   # socket_path = "/var/run/dpdk/rte/dpdk_telemetry.v2"
+#
+#   ## Duration that defines how long the connected socket client will wait for a response before terminating connection.
+#   ## This includes both writing to and reading from socket. Since it's local socket access
+#   ## to a fast packet processing application, the timeout should be sufficient for most users.
+#   ## Setting the value to 0 disables the timeout (not recommended)
+#   # socket_access_timeout = "200ms"
+#
+#   ## Enables telemetry data collection for selected device types.
+#   ## Adding "ethdev" enables collection of telemetry from DPDK NICs (stats, xstats, link_status).
+#   ## Adding "rawdev" enables collection of telemetry from DPDK Raw Devices (xstats).
+#   # device_types = ["ethdev"]
+#
+#   ## List of custom, application-specific telemetry commands to query
+#   ## The list of available commands depend on the application deployed. Applications can register their own commands
+#   ##   via telemetry library API http://doc.dpdk.org/guides/prog_guide/telemetry_lib.html#registering-commands
+#   ## For e.g. L3 Forwarding with Power Management Sample Application this could be:
+#   ##   additional_commands = ["/l3fwd-power/stats"]
+#   # additional_commands = []
+#
+#   ## Allows turning off collecting data for individual "ethdev" commands.
+#   ## Remove "/ethdev/link_status" from list to start getting link status metrics.
+#   [inputs.dpdk.ethdev]
+#     exclude_commands = ["/ethdev/link_status"]
+#
+#   ## When running multiple instances of the plugin it's recommended to add a unique tag to each instance to identify
+#   ## metrics exposed by an instance of DPDK application. This is useful when multiple DPDK apps run on a single host.
+#   ##  [inputs.dpdk.tags]
+#   ##    dpdk_instance = "my-fwd-app"
 
 
 # # Read metrics about docker containers from Fargate/ECS v2, v3 meta endpoints.
@@ -4536,6 +4599,15 @@
 #   #   apiVersion = "v1"
 
 
+# # Gathers huge pages measurements.
+# [[inputs.hugepages]]
+#   ## Supported huge page types:
+#   ##   - "root" - based on root huge page control directory: /sys/kernel/mm/hugepages
+#   ##   - "per_node" - based on per NUMA node directories: /sys/devices/system/node/node[0-9]*/hugepages
+#   ##   - "meminfo" - based on /proc/meminfo file
+#   # types = ["root", "per_node"]
+
+
 # # Gather Icinga2 status
 # [[inputs.icinga2]]
 #   ## Required Icinga2 server address
@@ -4589,6 +4661,17 @@
 #
 #   ## http request & header timeout
 #   timeout = "5s"
+
+
+# # Intel PowerStat plugin enables monitoring of platform metrics (power, TDP) and Core metrics like temperature, power and utilization.
+# [[inputs.intel_powerstat]]
+#   ## All global metrics are always collected by Intel PowerStat plugin.
+#   ## User can choose which per-CPU metrics are monitored by the plugin in cpu_metrics array.
+#   ## Empty array means no per-CPU specific metrics will be collected by the plugin - in this case only platform level
+#   ## telemetry will be exposed by Intel PowerStat plugin.
+#   ## Supported options:
+#   ## "cpu_frequency", "cpu_busy_frequency", "cpu_temperature", "cpu_c1_state_residency", "cpu_c6_state_residency", "cpu_busy_cycles"
+#   # cpu_metrics = []
 
 
 # # Collect statistics about itself
@@ -4675,6 +4758,31 @@
 #   use_sudo = false
 #   ## The default timeout of 1s for ipset execution can be overridden here:
 #   # timeout = "1s"
+
+
+# # Gather packets and bytes throughput from iptables
+# [[inputs.iptables]]
+#   ## iptables require root access on most systems.
+#   ## Setting 'use_sudo' to true will make use of sudo to run iptables.
+#   ## Users must configure sudo to allow telegraf user to run iptables with no password.
+#   ## iptables can be restricted to only list command "iptables -nvL".
+#   use_sudo = false
+#   ## Setting 'use_lock' to true runs iptables with the "-w" option.
+#   ## Adjust your sudo settings appropriately if using this option ("iptables -w 5 -nvl")
+#   use_lock = false
+#   ## Define an alternate executable, such as "ip6tables". Default is "iptables".
+#   # binary = "ip6tables"
+#   ## defines the table to monitor:
+#   table = "filter"
+#   ## defines the chains to monitor.
+#   ## NOTE: iptables rules without a comment will not be monitored.
+#   ## Read the plugin documentation for more information.
+#   chains = [ "INPUT" ]
+
+
+# # Collect virtual and real server stats from Linux IPVS
+# [[inputs.ipvs]]
+#   # no configuration
 
 
 # # Read jobs and cluster metrics from Jenkins instances
@@ -4872,6 +4980,11 @@
 #   # insecure_skip_verify = false
 
 
+# # Get kernel statistics from /proc/vmstat
+# [[inputs.kernel_vmstat]]
+#   # no configuration
+
+
 # # Read status information from one or more Kibana servers
 # [[inputs.kibana]]
 #   ## Specify a list of one or more Kibana servers
@@ -5008,6 +5121,22 @@
 #   #   "X-Special-Header" = "Special-Value"
 
 
+# # Read metrics from local Lustre service on OST, MDS
+# [[inputs.lustre2]]
+#   ## An array of /proc globs to search for Lustre stats
+#   ## If not specified, the default will work on Lustre 2.5.x
+#   ##
+#   # ost_procfiles = [
+#   #   "/proc/fs/lustre/obdfilter/*/stats",
+#   #   "/proc/fs/lustre/osd-ldiskfs/*/stats",
+#   #   "/proc/fs/lustre/obdfilter/*/job_stats",
+#   # ]
+#   # mds_procfiles = [
+#   #   "/proc/fs/lustre/mdt/*/md_stats",
+#   #   "/proc/fs/lustre/mdt/*/job_stats",
+#   # ]
+
+
 # # Read metrics about LVM physical volumes, volume groups, logical volumes.
 # [[inputs.lvm]]
 # ## Use sudo to run LVM commands
@@ -5054,6 +5183,13 @@
 #
 # 	## Timeout for metric collections from all servers.  Minimum timeout is "1s".
 #   # timeout = "5s"
+
+
+# # Get md array statistics from /proc/mdstat
+# [[inputs.mdstat]]
+# 	## Sets file path
+# 	## If not specified, then default is /proc/mdstat
+# 	# file_name = "/proc/mdstat"
 
 
 # # Read metrics from one or many memcached servers
@@ -5553,7 +5689,7 @@
 
 
 # # Read metrics about network interface usage
-# [[inputs.net]]
+[[inputs.net]]
 #   ## By default, telegraf gathers stats from any up interface (excluding loopback)
 #   ## Setting interfaces will tell it to gather these explicit interfaces,
 #   ## regardless of status.
@@ -6147,6 +6283,13 @@
 #   # size = 56
 
 
+# # Measure postfix queue statistics
+# [[inputs.postfix]]
+#   ## Postfix queue directory. If not provided, telegraf will try to use
+#   ## 'postconf -h queue_directory' to determine it.
+#   # queue_directory = "/var/spool/postfix"
+
+
 # # Read metrics from one or many PowerDNS servers
 # [[inputs.powerdns]]
 #   ## An array of sockets to gather stats about.
@@ -6458,6 +6601,16 @@
 #   # version = "39.0"
 
 
+# # Monitor sensors, requires lm-sensors package
+# [[inputs.sensors]]
+#   ## Remove numbers from field names.
+#   ## If true, a field name like 'temp1_input' will be changed to 'temp_input'.
+#   # remove_numbers = true
+#
+#   ## Timeout is the maximum amount of time that the sensors command can run.
+#   # timeout = "5s"
+
+
 # # Read metrics from storage devices supporting S.M.A.R.T.
 # [[inputs.smart]]
 #   ## Optionally specify the path to the smartctl executable
@@ -6671,6 +6824,15 @@
 #     sub_tables=[".1.3.6.1.2.1.2.2.1.13", "bytes_recv", "bytes_send"]
 
 
+# # Gather indicators from established connections, using iproute2's `ss` command.
+# [[inputs.socketstat]]
+#   ## ss can display information about tcp, udp, raw, unix, packet, dccp and sctp sockets
+#   ## List of protocol types to collect
+#   # protocols = [ "tcp", "udp" ]
+#   ## The default timeout of 1s for ss execution can be overridden here:
+#   # timeout = "1s"
+
+
 # # Read stats from one or more Solr servers or cores
 # [[inputs.solr]]
 #   ## specify a list of one or more Solr servers
@@ -6763,10 +6925,88 @@
 #   #  	 key = "device_name"
 #   #  	 value = 'one_of("sda", "sdb")'
 
+# # Get slab statistics from procfs
+# [[inputs.slab]]
+#   # no configuration
 
 # # Get synproxy counter statistics from procfs
 # [[inputs.synproxy]]
 #   # no configuration
+
+
+# # Sysstat metrics collector
+# [[inputs.sysstat]]
+#   ## Path to the sadc command.
+#   #
+#   ## Common Defaults:
+#   ##   Debian/Ubuntu: /usr/lib/sysstat/sadc
+#   ##   Arch:          /usr/lib/sa/sadc
+#   ##   RHEL/CentOS:   /usr/lib64/sa/sadc
+#   sadc_path = "/usr/lib/sa/sadc" # required
+#
+#   ## Path to the sadf command, if it is not in PATH
+#   # sadf_path = "/usr/bin/sadf"
+#
+#   ## Activities is a list of activities, that are passed as argument to the
+#   ## sadc collector utility (e.g: DISK, SNMP etc...)
+#   ## The more activities that are added, the more data is collected.
+#   # activities = ["DISK"]
+#
+#   ## Group metrics to measurements.
+#   ##
+#   ## If group is false each metric will be prefixed with a description
+#   ## and represents itself a measurement.
+#   ##
+#   ## If Group is true, corresponding metrics are grouped to a single measurement.
+#   # group = true
+#
+#   ## Options for the sadf command. The values on the left represent the sadf
+#   ## options and the values on the right their description (which are used for
+#   ## grouping and prefixing metrics).
+#   ##
+#   ## Run 'sar -h' or 'man sar' to find out the supported options for your
+#   ## sysstat version.
+#   [inputs.sysstat.options]
+#     -C = "cpu"
+#     -B = "paging"
+#     -b = "io"
+#     -d = "disk"             # requires DISK activity
+#     "-n ALL" = "network"
+#     "-P ALL" = "per_cpu"
+#     -q = "queue"
+#     -R = "mem"
+#     -r = "mem_util"
+#     -S = "swap_util"
+#     -u = "cpu_util"
+#     -v = "inode"
+#     -W = "swap"
+#     -w = "task"
+#   #  -H = "hugepages"        # only available for newer linux distributions
+#   #  "-I ALL" = "interrupts" # requires INT activity
+#
+#   ## Device tags can be used to add additional tags for devices.
+#   ## For example the configuration below adds a tag vg with value rootvg for
+#   ## all metrics with sda devices.
+#   # [[inputs.sysstat.device_tags.sda]]
+#   #  vg = "rootvg"
+
+
+# # Gather systemd units state
+# [[inputs.systemd_units]]
+#   ## Set timeout for systemctl execution
+#   # timeout = "1s"
+#   #
+#   ## Filter for a specific unit type, default is "service", other possible
+#   ## values are "socket", "target", "device", "mount", "automount", "swap",
+#   ## "timer", "path", "slice" and "scope ":
+#   # unittype = "service"
+#   #
+#   ## Filter for a specific pattern, default is "" (i.e. all), other possible
+#   ## values are valid pattern for systemctl, e.g. "a*" for all units with
+#   ## names starting with "a"
+#   # pattern = ""
+#   ## pattern = "telegraf* influxdb*"
+#   ## pattern = "a*"
 
 
 # # Reads metrics from a Teamspeak 3 Server via ServerQuery
@@ -6875,6 +7115,45 @@
 #   # timeout = "5s"
 
 
+# # A plugin to collect stats from Varnish HTTP Cache
+# [[inputs.varnish]]
+#   ## If running as a restricted user you can prepend sudo for additional access:
+#   #use_sudo = false
+#
+#   ## The default location of the varnishstat binary can be overridden with:
+#   binary = "/usr/bin/varnishstat"
+#
+#   ## Additional custom arguments for the varnishstat command
+#   # binary_args = ["-f", "MAIN.*"]
+#
+#   ## The default location of the varnishadm binary can be overriden with:
+#   adm_binary = "/usr/bin/varnishadm"
+#
+#   ## Custom arguments for the varnishadm command
+#   # adm_binary_args = [""]
+#
+#   ## Metric version defaults to metric_version=1, use metric_version=2 for removal of nonactive vcls.
+#   metric_version = 1
+#
+#   ## Additional regexps to override builtin conversion of varnish metrics into telegraf metrics.
+#   ## Regexp group "_vcl" is used for extracting the VCL name. Metrics that contains nonactive VCL's are skipped.
+#   ## Regexp group "_field" overrides field name. Other named regexp groups are used as tags.
+#   # regexps = ['XCNT\.(?P<_vcl>[\w\-]*)\.(?P<group>[\w\-.+]*)\.(?P<_field>[\w\-.+]*)\.val']
+#
+#   ## By default, telegraf gather stats for 3 metric points.
+#   ## Setting stats will override the defaults shown below.
+#   ## Glob matching can be used, ie, stats = ["MAIN.*"]
+#   ## stats may also be set to ["*"], which will collect all stats
+#   stats = ["MAIN.cache_hit", "MAIN.cache_miss", "MAIN.uptime"]
+#
+#   ## Optional name for the varnish instance (or working directory) to query
+#   ## Usually append after -n in varnish cli
+#   # instance_name = instanceName
+#
+#   ## Timeout for varnishstat command
+#   # timeout = "1s"
+
+
 # # Read metrics from the Vault API
 # [[inputs.vault]]
 #   ## URL for the Vault agent
@@ -6894,234 +7173,6 @@
 #   # tls_ca = /path/to/cafile
 #   # tls_cert = /path/to/certfile
 #   # tls_key = /path/to/keyfile
-
-
-# # Input plugin to collect Windows Event Log messages
-# [[inputs.win_eventlog]]
-#   ## Telegraf should have Administrator permissions to subscribe for some Windows Events channels
-#   ## (System log, for example)
-#
-#   ## LCID (Locale ID) for event rendering
-#   ## 1033 to force English language
-#   ## 0 to use default Windows locale
-#   # locale = 0
-#
-#   ## Name of eventlog, used only if xpath_query is empty
-#   ## Example: "Application"
-#   # eventlog_name = ""
-#
-#   ## xpath_query can be in defined short form like "Event/System[EventID=999]"
-#   ## or you can form a XML Query. Refer to the Consuming Events article:
-#   ## https://docs.microsoft.com/en-us/windows/win32/wes/consuming-events
-#   ## XML query is the recommended form, because it is most flexible
-#   ## You can create or debug XML Query by creating Custom View in Windows Event Viewer
-#   ## and then copying resulting XML here
-#   xpath_query = '''
-#   <QueryList>
-#     <Query Id="0" Path="Security">
-#       <Select Path="Security">*</Select>
-#       <Suppress Path="Security">*[System[( (EventID &gt;= 5152 and EventID &lt;= 5158) or EventID=5379 or EventID=4672)]]</Suppress>
-#     </Query>
-#     <Query Id="1" Path="Application">
-#       <Select Path="Application">*[System[(Level &lt; 4)]]</Select>
-#     </Query>
-#     <Query Id="2" Path="Windows PowerShell">
-#       <Select Path="Windows PowerShell">*[System[(Level &lt; 4)]]</Select>
-#     </Query>
-#     <Query Id="3" Path="System">
-#       <Select Path="System">*</Select>
-#     </Query>
-#     <Query Id="4" Path="Setup">
-#       <Select Path="Setup">*</Select>
-#     </Query>
-#   </QueryList>
-#   '''
-#
-#   ## System field names:
-#   ##   "Source", "EventID", "Version", "Level", "Task", "Opcode", "Keywords", "TimeCreated",
-#   ##   "EventRecordID", "ActivityID", "RelatedActivityID", "ProcessID", "ThreadID", "ProcessName",
-#   ##   "Channel", "Computer", "UserID", "UserName", "Message", "LevelText", "TaskText", "OpcodeText"
-#
-#   ## In addition to System, Data fields can be unrolled from additional XML nodes in event.
-#   ## Human-readable representation of those nodes is formatted into event Message field,
-#   ## but XML is more machine-parsable
-#
-#   # Process UserData XML to fields, if this node exists in Event XML
-#   process_userdata = true
-#
-#   # Process EventData XML to fields, if this node exists in Event XML
-#   process_eventdata = true
-#
-#   ## Separator character to use for unrolled XML Data field names
-#   separator = "_"
-#
-#   ## Get only first line of Message field. For most events first line is usually more than enough
-#   only_first_line_of_message = true
-#
-#   ## Parse timestamp from TimeCreated.SystemTime event field.
-#   ## Will default to current time of telegraf processing on parsing error or if set to false
-#   timestamp_from_event = true
-#
-#   ## Fields to include as tags. Globbing supported ("Level*" for both "Level" and "LevelText")
-#   event_tags = ["Source", "EventID", "Level", "LevelText", "Task", "TaskText", "Opcode", "OpcodeText", "Keywords", "Channel", "Computer"]
-#
-#   ## Default list of fields to send. All fields are sent by default. Globbing supported
-#   event_fields = ["*"]
-#
-#   ## Fields to exclude. Also applied to data fields. Globbing supported
-#   exclude_fields = ["TimeCreated", "Binary", "Data_Address*"]
-#
-#   ## Skip those tags or fields if their value is empty or equals to zero. Globbing supported
-#   exclude_empty = ["*ActivityID", "UserID"]
-
-
-# # Input plugin to counterPath Performance Counters on Windows operating systems
-[[inputs.win_perf_counters]]
-  ## By default this plugin returns basic CPU and Disk statistics.
-  ## See the README file for more examples.
-  ## Uncomment examples below or write your own as you see fit. If the system
-  ## being polled for data does not have the Object at startup of the Telegraf
-  ## agent, it will not be gathered.
-  ## Settings:
-  # PrintValid = false # Print All matching performance counters
-  # Whether request a timestamp along with the PerfCounter data or just use current time
-  # UsePerfCounterTime=true
-  # If UseWildcardsExpansion params is set to true, wildcards (partial wildcards in instance names and wildcards in counters names) in configured counter paths will be expanded
-  # and in case of localized Windows, counter paths will be also localized. It also returns instance indexes in instance names.
-  # If false, wildcards (not partial) in instance names will still be expanded, but instance indexes will not be returned in instance names.
-  #UseWildcardsExpansion = false
-  # When running on a localized version of Windows and with UseWildcardsExpansion = true, Windows will
-  # localize object and counter names. When LocalizeWildcardsExpansion = false, use the names in object.Counters instead
-  # of the localized names. Only Instances can have wildcards in this case. ObjectName and Counters must not have wildcards when this
-  # setting is false.
-  #LocalizeWildcardsExpansion = true
-  # Period after which counters will be reread from configuration and wildcards in counter paths expanded
-  CountersRefreshInterval="1m"
-  ## Accepts a list of PDH error codes which are defined in pdh.go, if this error is encountered it will be ignored
-  ## For example, you can provide "PDH_NO_DATA" to ignore performance counters with no instances
-  ## By default no errors are ignored
-  ## You can find the list here: https://github.com/influxdata/telegraf/blob/master/plugins/inputs/win_perf_counters/pdh.go
-  ## e.g.: IgnoredErrors = ["PDH_NO_DATA"]
-  # IgnoredErrors = []
-
-  [[inputs.win_perf_counters.object]]
-    # Processor usage, alternative to native, reports on a per core.
-    ObjectName = "Processor"
-    Instances = ["*"]
-    Counters = [
-      "% Idle Time",
-      "% Interrupt Time",
-      "% Privileged Time",
-      "% User Time",
-      "% Processor Time",
-      "% DPC Time",
-    ]
-    Measurement = "win_cpu"
-    # Set to true to include _Total instance when querying for all (*).
-    # IncludeTotal=false
-    # Print out when the performance counter is missing from object, counter or instance.
-    # WarnOnMissing = false
-    # Gather raw values instead of formatted. Raw value is stored in the field name with the "_Raw" suffix, e.g. "Disk_Read_Bytes_sec_Raw".
-    # UseRawValues = true
-
-  [[inputs.win_perf_counters.object]]
-    # Disk times and queues
-    ObjectName = "LogicalDisk"
-    Instances = ["*"]
-    Counters = [
-      "% Idle Time",
-      "% Disk Time",
-      "% Disk Read Time",
-      "% Disk Write Time",
-      "% User Time",
-      "% Free Space",
-      "Current Disk Queue Length",
-      "Free Megabytes",
-    ]
-    Measurement = "win_disk"
-
-  [[inputs.win_perf_counters.object]]
-    ObjectName = "PhysicalDisk"
-    Instances = ["*"]
-    Counters = [
-      "Disk Read Bytes/sec",
-      "Disk Write Bytes/sec",
-      "Current Disk Queue Length",
-      "Disk Reads/sec",
-      "Disk Writes/sec",
-      "% Disk Time",
-      "% Disk Read Time",
-      "% Disk Write Time",
-    ]
-    Measurement = "win_diskio"
-
-  [[inputs.win_perf_counters.object]]
-    ObjectName = "Network Interface"
-    Instances = ["*"]
-    Counters = [
-      "Bytes Received/sec",
-      "Bytes Sent/sec",
-      "Packets Received/sec",
-      "Packets Sent/sec",
-      "Packets Received Discarded",
-      "Packets Outbound Discarded",
-      "Packets Received Errors",
-      "Packets Outbound Errors",
-    ]
-    Measurement = "win_net"
-
-
-  [[inputs.win_perf_counters.object]]
-    ObjectName = "System"
-    Counters = [
-      "Context Switches/sec",
-      "System Calls/sec",
-      "Processor Queue Length",
-      "System Up Time",
-    ]
-    Instances = ["------"]
-    Measurement = "win_system"
-
-  [[inputs.win_perf_counters.object]]
-    # Example counterPath where the Instance portion must be removed to get data back,
-    # such as from the Memory object.
-    ObjectName = "Memory"
-    Counters = [
-      "Available Bytes",
-      "Cache Faults/sec",
-      "Demand Zero Faults/sec",
-      "Page Faults/sec",
-      "Pages/sec",
-      "Transition Faults/sec",
-      "Pool Nonpaged Bytes",
-      "Pool Paged Bytes",
-      "Standby Cache Reserve Bytes",
-      "Standby Cache Normal Priority Bytes",
-      "Standby Cache Core Bytes",
-    ]
-    Instances = ["------"] # Use 6 x - to remove the Instance bit from the counterPath.
-    Measurement = "win_mem"
-
-  [[inputs.win_perf_counters.object]]
-    # Example query where the Instance portion must be removed to get data back,
-    # such as from the Paging File object.
-    ObjectName = "Paging File"
-    Counters = [
-      "% Usage",
-    ]
-    Instances = ["_Total"]
-    Measurement = "win_swap"
-
-
-# # Input plugin to report Windows services info.
-# [[inputs.win_services]]
-#   ## Names of the services to monitor. Leave empty to monitor all the available services on the host. Globs accepted.
-#   service_names = [
-#     "LanmanServer",
-# 	"TermService",
-# 	"Win*",
-#   ]
-#   #excluded_service_names = [] # optional, list of service names to exclude
 
 
 # # Collect Wireguard server interface and peer statistics
@@ -8089,6 +8140,85 @@
 #   # parser_type = "internal"
 
 
+# # Intel Performance Monitoring Unit plugin exposes Intel PMU metrics available through Linux Perf subsystem
+# [[inputs.intel_pmu]]
+#   ## List of filesystem locations of JSON files that contain PMU event definitions.
+#   event_definitions = ["/var/cache/pmu/GenuineIntel-6-55-4-core.json", "/var/cache/pmu/GenuineIntel-6-55-4-uncore.json"]
+#
+#   ## List of core events measurement entities. There can be more than one core_events sections.
+#   [[inputs.intel_pmu.core_events]]
+#     ## List of events to be counted. Event names shall match names from event_definitions files.
+#     ## Single entry can contain name of the event (case insensitive) augmented with config options and perf modifiers.
+#     ## If absent, all core events from provided event_definitions are counted skipping unresolvable ones.
+#     events = ["INST_RETIRED.ANY", "CPU_CLK_UNHALTED.THREAD_ANY:config1=0x4043200000000k"]
+#
+#     ## Limits the counting of events to core numbers specified.
+#     ## If absent, events are counted on all cores.
+#     ## Single "0", multiple "0,1,2" and range "0-2" notation is supported for each array element.
+#     ##   example: cores = ["0,2", "4", "12-16"]
+#     cores = ["0"]
+#
+#     ## Indicator that plugin shall attempt to run core_events.events as a single perf group.
+#     ## If absent or set to false, each event is counted individually. Defaults to false.
+#     ## This limits the number of events that can be measured to a maximum of available hardware counters per core.
+#     ## Could vary depending on type of event, use of fixed counters.
+#     # perf_group = false
+#
+#     ## Optionally set a custom tag value that will be added to every measurement within this events group.
+#     ## Can be applied to any group of events, unrelated to perf_group setting.
+#     # events_tag = ""
+#
+#   ## List of uncore event measurement entities. There can be more than one uncore_events sections.
+#   [[inputs.intel_pmu.uncore_events]]
+#     ## List of events to be counted. Event names shall match names from event_definitions files.
+#     ## Single entry can contain name of the event (case insensitive) augmented with config options and perf modifiers.
+#     ## If absent, all uncore events from provided event_definitions are counted skipping unresolvable ones.
+#     events = ["UNC_CHA_CLOCKTICKS", "UNC_CHA_TOR_OCCUPANCY.IA_MISS"]
+#
+#     ## Limits the counting of events to specified sockets.
+#     ## If absent, events are counted on all sockets.
+#     ## Single "0", multiple "0,1" and range "0-1" notation is supported for each array element.
+#     ##   example: sockets = ["0-2"]
+#     sockets = ["0"]
+#
+#     ## Indicator that plugin shall provide an aggregated value for multiple units of same type distributed in an uncore.
+#     ## If absent or set to false, events for each unit are exposed as separate metric. Defaults to false.
+#     # aggregate_uncore_units = false
+#
+#     ## Optionally set a custom tag value that will be added to every measurement within this events group.
+#     # events_tag = ""
+
+
+# # Intel Resource Director Technology plugin
+# [[inputs.intel_rdt]]
+# 	## Optionally set sampling interval to Nx100ms.
+# 	## This value is propagated to pqos tool. Interval format is defined by pqos itself.
+# 	## If not provided or provided 0, will be set to 10 = 10x100ms = 1s.
+# 	# sampling_interval = "10"
+# 	
+# 	## Optionally specify the path to pqos executable.
+# 	## If not provided, auto discovery will be performed.
+# 	# pqos_path = "/usr/local/bin/pqos"
+#
+# 	## Optionally specify if IPC and LLC_Misses metrics shouldn't be propagated.
+# 	## If not provided, default value is false.
+# 	# shortened_metrics = false
+# 	
+# 	## Specify the list of groups of CPU core(s) to be provided as pqos input.
+# 	## Mandatory if processes aren't set and forbidden if processes are specified.
+# 	## e.g. ["0-3", "4,5,6"] or ["1-3,4"]
+# 	# cores = ["0-3"]
+# 	
+# 	## Specify the list of processes for which Metrics will be collected.
+# 	## Mandatory if cores aren't set and forbidden if cores are specified.
+# 	## e.g. ["qemu", "pmd"]
+# 	# processes = ["process"]
+#
+# 	## Specify if the pqos process should be called with sudo.
+# 	## Mandatory if the telegraf process does not run as root.
+# 	# use_sudo = false
+
+
 # # Read JTI OpenConfig Telemetry from listed sensors
 # [[inputs.jti_openconfig_telemetry]]
 #   ## List of device addresses to collect telemetry from
@@ -8820,6 +8950,13 @@
 #   # tls_key = /path/to/keyfile
 #   ## Use TLS but skip chain & host verification
 #   # insecure_skip_verify = false
+
+
+# # RAS plugin exposes counter metrics for Machine Check Errors provided by RASDaemon (sqlite3 output is required).
+# [[inputs.ras]]
+#   ## Optional path to RASDaemon sqlite3 database.
+#   ## Default: /var/lib/rasdaemon/ras-mc_event.db
+#   # db_path = ""
 
 
 # # Riemann protobuff listener.

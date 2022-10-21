@@ -123,7 +123,7 @@
   insecure_skip_verify = false
   data_format = "vngcloud_vmonitor"
   api_key = "${API_KEY}"
-  timeout = "30s"
+
 # Configuration for sending metrics to InfluxDB
 #[[outputs.influxdb]]
   ## The full HTTP or UDP URL for your InfluxDB instance.
