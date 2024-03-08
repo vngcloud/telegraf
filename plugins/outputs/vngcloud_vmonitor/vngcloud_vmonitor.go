@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/influxdata/telegraf"
@@ -143,14 +142,21 @@ func (h *VNGCloudvMonitor) initHTTPClient() error {
 	return nil
 }
 
-func (h *VNGCloudvMonitor) getIp(address, port string) (string, error) {
-	h.Log.Infof("Dial %s %s", address, port)
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(address, port), 5*time.Second)
+// GetLocalIP returns the non loopback local IP of the host
+func GetLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		return "", err
+		return ""
 	}
-	defer conn.Close()
-	return strings.Split(conn.LocalAddr().String(), ":")[0], nil
+	for _, address := range addrs {
+		// check the address type and if it is not a loopback the display it
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
 }
 
 func getModelNameCPU() (string, error) {
@@ -162,35 +168,8 @@ func getModelNameCPU() (string, error) {
 }
 
 func (h *VNGCloudvMonitor) getHostInfo() (*infoHost, error) {
-	getHostPort := func(urlStr string) (string, error) {
-		u, err := url.Parse(urlStr)
-		if err != nil {
-			return "", fmt.Errorf("url invalid %s", urlStr)
-		}
-
-		host, port, err := net.SplitHostPort(u.Host)
-
-		if err != nil {
-			return "", err
-		}
-
-		ipLocal, err := h.getIp(host, port)
-		if err != nil {
-			return "", err
-		}
-		return ipLocal, nil
-	}
-
-	var ipLocal string
+	ipLocal := GetLocalIP()
 	var err error
-	// get ip local
-
-	ipLocal, err = getHostPort(h.URL)
-
-	if err != nil {
-		return nil, fmt.Errorf("err getting ip address %s", err.Error())
-	}
-	// get ip local
 
 	gi, err := goInfo.GetInfo()
 	if err != nil {
