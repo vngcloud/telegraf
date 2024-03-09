@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-if [ "$(echo $1 | cut -c 1)" = "-" ]; then
+if [ "$(echo "$1" | cut -c1)" = '-' ]; then
     set -- telegraf "$@"
 fi
 
