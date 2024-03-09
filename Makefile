@@ -1,3 +1,12 @@
+.PHONY: build-package
+build-package:
+	rm -rf ./build/
+	NIGHTLY=vmonitor make package include_packages="amd64.deb"
+
+runn:
+	# ./telegraf --config telegraf_pro.conf
+	make build && ./telegraf --config telegraf_pro.conf
+
 ifneq (,$(filter $(OS),Windows_NT Windows))
 	EXEEXT=.exe
 endif
@@ -124,11 +133,12 @@ config:
 
 	rm -rf etc/telegraf.conf
 	cp -rf etc/telegraf_linux.conf etc/telegraf.conf
+	# cp -rf etc/telegraf_windows.conf etc/telegraf.conf
 
-	@if [ $(GOOS) = "windows" ]; then \
-		rm -rf etc/telegraf.conf \
-		cp -rf etc/telegraf_windows.conf etc/telegraf.conf; \
-	fi
+	# @if [ $(GOOS) = "windows" ]; then \
+	# 	rm -rf etc/telegraf.conf \
+	# 	cp -rf etc/telegraf_windows.conf etc/telegraf.conf; \
+	# fi
 
 .PHONY: docs
 docs: build_tools embed_readme_inputs embed_readme_outputs embed_readme_processors embed_readme_aggregators embed_readme_secretstores
