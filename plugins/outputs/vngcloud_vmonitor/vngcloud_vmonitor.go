@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -80,7 +79,7 @@ type infoHost struct {
 	CPUs         int    `json:"cpus"`
 	ModelNameCPU string `json:"model_name_cpu"`
 	Mem          uint64 `json:"mem"`
-	Ip           string `json:"ip"`
+	IP           string `json:"ip"`
 	AgentVersion string `json:"agent_version"`
 	UserAgent    string `toml:"user_agent"`
 }
@@ -94,12 +93,12 @@ type VNGCloudvMonitor struct {
 	Log telegraf.Logger `toml:"-"`
 
 	IamURL       string `toml:"iam_url"`
-	ClientId     string `toml:"client_id"`
+	ClientID     string `toml:"client_id"`
 	ClientSecret string `toml:"client_secret"`
 
 	serializer serializers.Serializer
 	infoHost   *infoHost
-	client_iam *http.Client
+	clientIam  *http.Client
 
 	checkQuotaRetry config.Duration
 	dropCount       int
@@ -113,8 +112,8 @@ func (h *VNGCloudvMonitor) SetSerializer(serializer serializers.Serializer) {
 
 func (h *VNGCloudvMonitor) initHTTPClient() error {
 	h.Log.Debug("Init client-iam ...")
-	Oauth2ClientConfig := &clientcredentials.Config{
-		ClientID:     h.ClientId,
+	oauth2ClientConfig := &clientcredentials.Config{
+		ClientID:     h.ClientID,
 		ClientSecret: h.ClientSecret,
 		TokenURL:     h.IamURL,
 	}
@@ -128,16 +127,16 @@ func (h *VNGCloudvMonitor) initHTTPClient() error {
 		},
 		Timeout: time.Duration(h.Timeout),
 	})
-	token, err := Oauth2ClientConfig.TokenSource(ctx).Token()
+	token, err := oauth2ClientConfig.TokenSource(ctx).Token()
 	if err != nil {
-		return fmt.Errorf("failed to get token: %s", err.Error())
+		return fmt.Errorf("failed to get token: %w", err)
 	}
 
 	_, err = json.Marshal(token)
 	if err != nil {
-		return fmt.Errorf("failed to Marshal token: %s", err.Error())
+		return fmt.Errorf("failed to Marshal token: %w", err)
 	}
-	h.client_iam = Oauth2ClientConfig.Client(ctx)
+	h.clientIam = oauth2ClientConfig.Client(ctx)
 	h.Log.Info("Init client-iam successfully !")
 	return nil
 }
@@ -173,19 +172,19 @@ func (h *VNGCloudvMonitor) getHostInfo() (*infoHost, error) {
 
 	gi, err := goInfo.GetInfo()
 	if err != nil {
-		return nil, fmt.Errorf("error getting os info: %s", err)
+		return nil, fmt.Errorf("error getting os info: %w", err)
 	}
 	ps := system.NewSystemPS()
 	vm, err := ps.VMStat()
 
 	if err != nil {
-		return nil, fmt.Errorf("error getting virtual memory info: %s", err)
+		return nil, fmt.Errorf("error getting virtual memory info: %w", err)
 	}
 
 	modelNameCPU, err := getModelNameCPU()
 
 	if err != nil {
-		return nil, fmt.Errorf("error getting cpu model name: %s", err)
+		return nil, fmt.Errorf("error getting cpu model name: %w", err)
 	}
 
 	h.infoHost = &infoHost{
@@ -200,7 +199,7 @@ func (h *VNGCloudvMonitor) getHostInfo() (*infoHost, error) {
 		CPUs:         gi.CPUs,
 		ModelNameCPU: modelNameCPU,
 		Mem:          vm.Total,
-		Ip:           ipLocal,
+		IP:           ipLocal,
 		AgentVersion: agentVersion,
 		UserAgent:    fmt.Sprintf("%s/%s (%s)", "vMonitorAgent", agentVersion, gi.OS),
 	}
@@ -208,13 +207,13 @@ func (h *VNGCloudvMonitor) getHostInfo() (*infoHost, error) {
 	return h.infoHost, nil
 }
 
-func isUrl(str string) bool {
+func isURL(str string) bool {
 	u, err := url.Parse(str)
 	return err == nil && u.Scheme != "" && u.Host != ""
 }
 
 func (h *VNGCloudvMonitor) CheckConfig() error {
-	ok := isUrl(h.URL)
+	ok := isURL(h.URL)
 	if !ok {
 		return fmt.Errorf("URL Invalid %s", h.URL)
 	}
@@ -222,7 +221,6 @@ func (h *VNGCloudvMonitor) CheckConfig() error {
 }
 
 func (h *VNGCloudvMonitor) Connect() error {
-
 	if err := h.CheckConfig(); err != nil {
 		return err
 	}
@@ -230,7 +228,7 @@ func (h *VNGCloudvMonitor) Connect() error {
 	// h.client_iam = client_iam
 	err := h.initHTTPClient()
 	if err != nil {
-		log.Print(err)
+		h.Log.Info(err)
 		return err
 	}
 
@@ -251,7 +249,6 @@ func (h *VNGCloudvMonitor) Description() string {
 }
 
 func (h *VNGCloudvMonitor) SampleConfig() string {
-	//log.Print(sampleConfig)
 	return sampleConfig
 }
 
@@ -308,7 +305,7 @@ func (h *VNGCloudvMonitor) Write(metrics []telegraf.Metric) error {
 	if h.checkQuotaFirst {
 		if isDrop, err := h.checkQuota(); err != nil {
 			if isDrop {
-				h.Log.Warnf("Drop metrics because of %s", err.Error())
+				h.Log.Warnf("Drop metrics because of %w", err)
 				return nil
 			}
 			return err
@@ -320,23 +317,10 @@ func (h *VNGCloudvMonitor) Write(metrics []telegraf.Metric) error {
 		return err
 	}
 
-	if err := h.write(reqBody); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (h *VNGCloudvMonitor) write(reqBody []byte) error {
-
 	var reqBodyBuffer io.Reader = bytes.NewBuffer(reqBody)
 
-	var err error
 	if h.ContentEncoding == "gzip" {
 		rc := internal.CompressWithGzip(reqBodyBuffer)
-		if err != nil {
-			return err
-		}
 		defer rc.Close()
 		reqBodyBuffer = rc
 	}
@@ -354,13 +338,13 @@ func (h *VNGCloudvMonitor) write(reqBody []byte) error {
 		req.Header.Set("Content-Encoding", "gzip")
 	}
 
-	resp, err := h.client_iam.Do(req)
+	resp, err := h.clientIam.Do(req)
 	if err != nil {
 		if er := h.initHTTPClient(); er != nil {
 			h.Log.Warnf("Drop metrics because can't init IAM: %s", er.Error())
 			return nil
 		}
-		return fmt.Errorf("IAM request fail: %s", err.Error())
+		return fmt.Errorf("IAM request fail: %w", err)
 	}
 	defer resp.Body.Close()
 	dataRsp, err := io.ReadAll(resp.Body)
@@ -373,7 +357,7 @@ func (h *VNGCloudvMonitor) write(reqBody []byte) error {
 
 	if isDrop, err := h.handleResponse(resp.StatusCode, dataRsp); err != nil {
 		if isDrop {
-			h.Log.Warnf("Drop metrics because of %s", err.Error())
+			h.Log.Warnf("Drop metrics because of %w", err)
 			return nil
 		}
 		return err
@@ -382,7 +366,6 @@ func (h *VNGCloudvMonitor) write(reqBody []byte) error {
 }
 
 func (h *VNGCloudvMonitor) handleResponse(respCode int, dataRsp []byte) (bool, error) {
-
 	switch respCode {
 	case 201:
 		return false, nil
@@ -392,7 +375,7 @@ func (h *VNGCloudvMonitor) handleResponse(respCode int, dataRsp []byte) (bool, e
 		return true, fmt.Errorf("IAM Forbidden. Please check your permission")
 	case 428:
 		if isDrop, err := h.checkQuota(); err != nil {
-			return isDrop, fmt.Errorf("can not check quota: %s", err.Error())
+			return isDrop, fmt.Errorf("can not check quota: %w", err)
 		}
 	case 409:
 		h.doubleCheckTime()
@@ -409,28 +392,28 @@ func (h *VNGCloudvMonitor) checkQuota() (bool, error) {
 		Checksum: h.infoHost.HashID,
 		Data:     h.infoHost,
 	}
-	quotaJson, err := json.Marshal(quotaStruct)
+	quotaJSON, err := json.Marshal(quotaStruct)
 	if err != nil {
-		return false, fmt.Errorf("can not marshal quota struct: %s", err.Error())
+		return false, fmt.Errorf("can not marshal quota struct: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s", h.URL, quotaPath), bytes.NewBuffer(quotaJson))
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s", h.URL, quotaPath), bytes.NewBuffer(quotaJSON))
 	if err != nil {
-		return false, fmt.Errorf("error create new request: %s", err.Error())
+		return false, fmt.Errorf("error create new request: %w", err)
 	}
 	req.Header.Set("checksum", h.infoHost.HashID)
 	req.Header.Set("Content-Type", defaultContentType)
 	req.Header.Set("User-Agent", h.infoHost.UserAgent)
-	resp, err := h.client_iam.Do(req)
+	resp, err := h.clientIam.Do(req)
 
 	if err != nil {
-		return false, fmt.Errorf("send request checking quota failed: (%s)", err.Error())
+		return false, fmt.Errorf("send request checking quota failed: (%w)", err)
 	}
 	defer resp.Body.Close()
 	dataRsp, err := io.ReadAll(resp.Body)
 
 	if err != nil {
-		return false, fmt.Errorf("error occurred when reading response body: (%s)", err.Error())
+		return false, fmt.Errorf("error occurred when reading response body: (%w)", err)
 	}
 
 	isDrop := false
@@ -469,7 +452,6 @@ func init() {
 			CPUs:        0,
 			Mem:         0,
 		}
-		log.Print("#################### Welcome to vMonitor (VNGCLOUD) ####################")
 		return &VNGCloudvMonitor{
 			Timeout:         defaultConfig.Timeout,
 			URL:             defaultConfig.URL,

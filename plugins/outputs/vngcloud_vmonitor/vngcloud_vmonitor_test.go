@@ -25,7 +25,7 @@ import (
 	"github.com/influxdata/telegraf/testutil"
 )
 
-func NewOutputPlugin(url, url2 string) *VNGCloudvMonitor {
+func NewOutputPlugin(vURL, url2 string) *VNGCloudvMonitor {
 	infoHosts := &infoHost{
 		Plugins:     []Plugin{},
 		PluginsList: make(map[string]bool),
@@ -39,10 +39,10 @@ func NewOutputPlugin(url, url2 string) *VNGCloudvMonitor {
 		Mem:         0,
 	}
 	return &VNGCloudvMonitor{
-		URL:             url,
+		URL:             vURL,
 		IamURL:          url2,
 		Log:             testutil.Logger{},
-		ClientId:        "fakeClient_id",
+		ClientID:        "fakeClient_id",
 		ClientSecret:    "fakeClient_secret",
 		checkQuotaRetry: config.Duration(1500 * time.Millisecond),
 
@@ -65,7 +65,10 @@ func intakeTestServer3(code1, code2 int) func(http.ResponseWriter, *http.Request
 			w.WriteHeader(code2)
 			values.Add("msg", fmt.Sprintf("%d", code2))
 		}
-		w.Write([]byte(values.Encode()))
+		_, err := w.Write([]byte(values.Encode()))
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
@@ -78,24 +81,30 @@ func iamTestServer3(code int) func(http.ResponseWriter, *http.Request) {
 			values.Add("access_token", "tokennnnnnnnnnnnnn")
 			values.Add("tokenType", "Bearer")
 			values.Add("expires_in", "5")
-			w.Write([]byte(values.Encode()))
+			_, err := w.Write([]byte(values.Encode()))
+			if err != nil {
+				fmt.Println(err)
+			}
 		default:
 			w.WriteHeader(code)
 			values := url.Values{}
 			values.Add("msg", fmt.Sprintf("%d", code))
-			w.Write([]byte(values.Encode()))
+			_, err := w.Write([]byte(values.Encode()))
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	}
 }
 
 func TestDrop(t *testing.T) {
-	intake_server := httptest.NewServer(http.NotFoundHandler())
-	defer intake_server.Close()
-	iammmm_server := httptest.NewServer(http.NotFoundHandler())
-	defer iammmm_server.Close()
+	intakeServer := httptest.NewServer(http.NotFoundHandler())
+	defer intakeServer.Close()
+	iammmmServer := httptest.NewServer(http.NotFoundHandler())
+	defer iammmmServer.Close()
 
-	intake_server.Config.Handler = http.HandlerFunc(intakeTestServer3(200, 201))
-	iammmm_server.Config.Handler = http.HandlerFunc(iamTestServer3(200))
+	intakeServer.Config.Handler = http.HandlerFunc(intakeTestServer3(200, 201))
+	iammmmServer.Config.Handler = http.HandlerFunc(iamTestServer3(200))
 
 	tests := []struct {
 		name    string
@@ -150,7 +159,7 @@ func TestDrop(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			fmt.Printf("\n\n%s\n", tt.name)
 			fmt.Println("------------------------------------")
-			plug := NewOutputPlugin(intake_server.URL, iammmm_server.URL)
+			plug := NewOutputPlugin(intakeServer.URL, iammmmServer.URL)
 			err := plug.Connect()
 			require.NoError(t, err)
 			serializer, _ := vngcloud_vmonitor.NewSerializer(time.Duration(10) * time.Second)
@@ -168,8 +177,8 @@ func TestDrop(t *testing.T) {
 
 			for i := 0; i < len(tt.codeArr); i++ {
 				// each test
-				intake_server.Config.Handler = http.HandlerFunc(intakeTestServer3(tt.codeArr[i][0], tt.codeArr[i][1]))
-				iammmm_server.Config.Handler = http.HandlerFunc(iamTestServer3(tt.codeArr[i][2]))
+				intakeServer.Config.Handler = http.HandlerFunc(intakeTestServer3(tt.codeArr[i][0], tt.codeArr[i][1]))
+				iammmmServer.Config.Handler = http.HandlerFunc(iamTestServer3(tt.codeArr[i][2]))
 				time.Sleep(2 * time.Second)
 				fmt.Println()
 				if tt.codeArr[i][3] == 0 {
