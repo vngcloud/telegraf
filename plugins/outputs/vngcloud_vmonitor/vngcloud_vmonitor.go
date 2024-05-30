@@ -111,6 +111,8 @@ func (h *VNGCloudvMonitor) SetSerializer(serializer serializers.Serializer) {
 }
 
 func (h *VNGCloudvMonitor) initHTTPClient() error {
+	h.Log.Debug("Target: ", "monitoring-agent.vngcloud.vn ", getIPTarget("monitoring-agent.vngcloud.vn"))
+	h.Log.Debug("Target: ", "iamapis.vngcloud.vn ", getIPTarget("iamapis.vngcloud.vn"))
 	h.Log.Debug("Init client-iam ...")
 	oauth2ClientConfig := &clientcredentials.Config{
 		ClientID:     h.ClientID,
@@ -139,6 +141,16 @@ func (h *VNGCloudvMonitor) initHTTPClient() error {
 	h.clientIam = oauth2ClientConfig.Client(ctx)
 	h.Log.Info("Init client-iam successfully !")
 	return nil
+}
+
+func getIPTarget(target string) string {
+	ips, _ := net.LookupIP(target)
+	for _, ip := range ips {
+		if ipv4 := ip.To4(); ipv4 != nil {
+			return ipv4.String()
+		}
+	}
+	return ""
 }
 
 // GetLocalIP returns the non loopback local IP of the host
@@ -396,6 +408,8 @@ func (h *VNGCloudvMonitor) checkQuota() (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("can not marshal quota struct: %w", err)
 	}
+
+	h.Log.Debugf("Request check quota body: %s", string(quotaJSON))
 
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s", h.URL, quotaPath), bytes.NewBuffer(quotaJSON))
 	if err != nil {
