@@ -4,7 +4,11 @@ RUN echo 'hosts: files dns' >> /etc/nsswitch.conf
 RUN apk add --no-cache iputils ca-certificates net-snmp-tools procps lm_sensors tzdata su-exec libcap && \
     update-ca-certificates
 
-ENV TELEGRAF_VERSION 1.26.0-2.0.2
+ARG ARG_VERSION
+ENV TELEGRAF_VERSION $ARG_VERSION
+
+ARG ARG_GITHUB_REPOSITORY
+ENV GITHUB_REPOSITORY $ARG_GITHUB_REPOSITORY
 
 RUN ARCH= && \
     case "$(apk --print-arch)" in \
@@ -16,7 +20,7 @@ RUN ARCH= && \
     mkdir ~/.gnupg; \
     echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf; \
     apk add --no-cache --virtual .build-deps wget gnupg tar && \
-    wget --no-verbose https://github.com/vngcloud/vmonitor-metrics-agent/releases/download/${TELEGRAF_VERSION}/telegraf-nightly_static_linux_${ARCH}.tar.gz && \
+    wget --no-verbose https://github.com/${GITHUB_REPOSITORY}/releases/download/${TELEGRAF_VERSION}/telegraf-nightly_linux_${ARCH}.tar.gz && \
     mkdir -p /usr/src /etc/telegraf && \
     tar -C /usr/src -xzf telegraf-nightly_static_linux_${ARCH}.tar.gz && \
     mv /usr/src/telegraf*/etc/telegraf/telegraf.conf /etc/telegraf/ && \
