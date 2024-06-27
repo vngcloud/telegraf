@@ -131,14 +131,9 @@ config:
 	@echo "generating default config $(GOOS)"
 	# go run ./cmd/telegraf config > etc/telegraf.conf
 
-	rm -rf etc/telegraf.conf
-	cp -rf etc/telegraf_linux.conf etc/telegraf.conf
-	# cp -rf etc/telegraf_windows.conf etc/telegraf.conf
+	@if [ $(GOOS) != "windows" ]; then cp -rf etc/telegraf_linux.conf etc/telegraf.conf; fi
+	@if [ $(GOOS) = "windows" ]; then cp -rf etc/telegraf_windows.conf etc/telegraf.conf; fi
 
-	# @if [ $(GOOS) = "windows" ]; then \
-	# 	rm -rf etc/telegraf.conf \
-	# 	cp -rf etc/telegraf_windows.conf etc/telegraf.conf; \
-	# fi
 
 .PHONY: docs
 docs: build_tools embed_readme_inputs embed_readme_outputs embed_readme_processors embed_readme_aggregators embed_readme_secretstores
