@@ -40,10 +40,23 @@ jobs:
         # run: NIGHTLY=vmonitor make package include_packages="freebsd_amd64.tar.gz linux_amd64.tar.gz amd64.deb x86_64.rpm       linux_arm64.tar.gz arm64.deb aarch64.rpm          freebsd_i386.tar.gz i386.deb linux_i386.tar.gz i386.rpm"
 
       - name: Install Windows dependencies
-        run: go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest && export PATH=~/go/bin
+        run: go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
+
+      - name: Debug
+        run: |
+          export PATH=${PATH}:~/go/bin
+          export PATH=${PATH}:`go env GOPATH`/bin
+          echo $PATH
+          goversioninfo -skip-versioninfo
 
       - name: Build Windows package
-        run: NIGHTLY=vmonitor make package include_packages="windows_i386.zip windows_amd64.zip windows_arm64.zip"
+        run: |
+          export PATH=${PATH}:~/go/bin
+          export PATH=${PATH}:`go env GOPATH`/bin
+          echo $PATH
+          NIGHTLY=vmonitor make package include_packages="windows_amd64.zip"
+
+        # NIGHTLY=vmonitor make package include_packages="windows_i386.zip windows_amd64.zip windows_arm64.zip"
 
       - name: Debug
         run: ls -al ./build/dist/
