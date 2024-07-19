@@ -132,6 +132,7 @@ require (
 	github.com/linkedin/goavro/v2 v2.13.0
 	github.com/logzio/azure-monitor-metrics-receiver v1.0.2
 	github.com/lxc/incus/v6 v6.2.0
+	github.com/matishsiao/goInfo v0.0.0-20210923090445-da2e3fa8d45f
 	github.com/mdlayher/apcupsd v0.0.0-20220319200143-473c7b5f3c6a
 	github.com/mdlayher/vsock v1.2.1
 	github.com/microsoft/ApplicationInsights-Go v0.4.4
@@ -171,6 +172,7 @@ require (
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/seancfoley/ipaddress-go v1.6.0
 	github.com/sensu/sensu-go/api/core/v2 v2.16.0
+	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/shirou/gopsutil/v3 v3.24.4
 	github.com/showwin/speedtest-go v1.7.7
 	github.com/signalfx/golib/v3 v3.3.53
