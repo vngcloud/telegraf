@@ -2,7 +2,7 @@ name: CI
 on: push
 
 env:
-  TMP_RELEASE: 1.31.0-1.0.0
+  TMP_RELEASE: 1.31.1-2.0.0
 
 jobs:
   build:

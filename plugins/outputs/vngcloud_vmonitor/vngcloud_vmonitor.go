@@ -31,7 +31,7 @@ const (
 	metricPath         = "/intake/v2/series"
 	quotaPath          = "/intake/v2/check"
 	defaultContentType = "application/json"
-	agentVersion       = "1.26.0-2.0.0"
+	agentVersion       = "1.31.1-2.0.0"
 	retryTime          = 128 // = 2^7 => retry max 128*30s
 )
 
